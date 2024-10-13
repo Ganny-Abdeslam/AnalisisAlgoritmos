@@ -1,14 +1,14 @@
-# AnalisisAlgoritmos
+v# AnalisisAlgoritmos
 Proyecto Final de Análisis de Algoritmos
 
 Taylor&Francis
 ````
-- Se descarta porque no se puede descargar en BitText solo en mugrientso csv.
+- -Se descarta porque los metadatos descargados no incluyen el Abstract, lo cual es super importante para el desarrollo de este proyecto.
 ````
 
 Springer
 ````
-- No descarga
+- No deja descarga los metadatos de los articulos buscados.
 ````
 
 Cumple todas:
@@ -31,11 +31,12 @@ Descartado:
 - Volumen
 ````
 
-Fecha de descarga 13/10
+Fecha de descarga de los articulos: 13 de Octubre
 
 Descargados:
 ````
 - Scopus 10195
 - Sciencedirect 2k
 - IEE 2k
+- SAGE 1k
 ````
