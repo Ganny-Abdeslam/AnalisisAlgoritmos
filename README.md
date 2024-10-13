@@ -35,8 +35,8 @@ Fecha de descarga de los articulos: 13 de Octubre
 
 Descargados:
 ````
-- Scopus 10195
-- Sciencedirect 2k
-- IEE 2k
-- SAGE 1k
+- Scopus: 10,195 artículos
+- ScienceDirect: 2,000 artículos
+- IEEE Xplore: 2,000 artículos
+- SAGE Journals: 1,000 artículos
 ````
