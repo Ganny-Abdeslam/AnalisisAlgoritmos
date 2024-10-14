@@ -1,6 +1,6 @@
 from pathlib import Path
 
-directory = Path('./IEEE/')
+directory = Path('./Scopus/')
 archivos = directory.glob("*.bib")
 
 for archivo in archivos:
