@@ -1,6 +1,19 @@
 v# AnalisisAlgoritmos
 Proyecto Final de Análisis de Algoritmos
 
+Crear un entorno virtual:
+````
+python -m venv EntornoVirtual
+````
+Activar Entorno Virtual:
+````
+.\EntornoVirtual\Scripts\activate
+````
+Instalar dependencias:
+````
+pip install -r requirements.txt
+````
+
 Taylor&Francis
 ````
 - -Se descarta porque los metadatos descargados no incluyen el Abstract, lo cual es super importante para el desarrollo de este proyecto.
