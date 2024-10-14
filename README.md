@@ -5,6 +5,10 @@ Crear un entorno virtual:
 ````
 python -m venv EntornoVirtual
 ````
+Activar Entorno Virtual:
+````
+.\EntornoVirtual\Scripts\activate
+````
 Instalar dependencias:
 ````
 pip install -r requirements.txt
