@@ -1,4 +1,6 @@
 from pathlib import Path
+import time
+import tracemalloc
 import re
 
 count = 0
@@ -8,21 +10,22 @@ def unificar_archivos_bib(archivo_unificado, origenes):
         for origen in origenes:
             archivos = obtener_archivos_bib(origen)
             for archivo in archivos:
-                procesar_archivo(archivo, salida)
+                procesar_archivo(archivo, salida, origen)
 
 def obtener_archivos_bib(origen):
     directory = Path(origen)
     archivos = directory.glob("*.bib")
     return archivos
 
-def procesar_archivo(archivo, salida):
+def procesar_archivo(archivo, salida, origen):
     with open(archivo, 'r', encoding="utf-8") as a:
         contenido = a.read()
         lineas = contenido.split('\n')
-        extraer_campos(lineas, salida)
+        extraer_campos(lineas, salida, origen)
 
-def extraer_campos(lineas, salida):
+def extraer_campos(lineas, salida, origen):
     global count
+    origen = origen.replace('./','').replace('/','')
     desired_fields = ('author', 'title', 'doi', 'year', 'abstract', 'journal')
 
     for linea in lineas:
@@ -34,10 +37,13 @@ def extraer_campos(lineas, salida):
             elif '@' in linea:
                 count += 1
                 salida.write("------------------------------------\n")
+                salida.write(f"BDOrigen: {origen}\n")
         except:
             if linea and linea[0] == '@':
                 count += 1
                 salida.write("------------------------------------\n")
+                salida.write(f"BDOrigen: {origen}\n")
+
             else:
                 pass
 
@@ -59,10 +65,23 @@ def formatear_autores(value):
     autores = ", ".join([autor.strip() for autor in temp]).replace("{", "").replace("},", "")
     return autores
 
+def medir_tiempo_y_memoria(func, *args):
+    tracemalloc.start()
+    start_time = time.time()
+
+    func(*args)
+
+    end_time = time.time()
+    memory_usage, peak_memory = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    print(f"Tiempo de ejecución: {end_time - start_time:.4f} segundos")
+    print(f"Memoria usada: {memory_usage / 1024:.4f} KB\n")
+
 if __name__ == "__main__":
     archivo_unificado = "unificados.bib"
     origenes = ['./IEEE/', './Sage/', './ScienceDirect/', './Scopus/']
     
-    unificar_archivos_bib(archivo_unificado, origenes)
+    medir_tiempo_y_memoria(unificar_archivos_bib, archivo_unificado, origenes)
 
     print(f"Total de artículos procesados: {count}")
