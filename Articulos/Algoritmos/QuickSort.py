@@ -2,7 +2,7 @@ import time
 import tracemalloc
 import sys
 
-sys.setrecursionlimit(2000)  # Aumenta el límite de recursión
+sys.setrecursionlimit(2000)
 
 dic = {}
 
@@ -58,26 +58,15 @@ def procesar_archivo(archivo, salida, campo):
 def median_of_three(dic, campo, low, high):
     mid = (low + high) // 2
 
-    def obtener_primera_letra(valor):
-        if isinstance(valor, str) and len(valor) > 0:
-            return ord(valor[0])
-        elif isinstance(valor, int):
-            return valor  # Si es un número, lo usamos tal cual
-        else:
-            return float('-inf')  # Si no es válido, devolvemos el menor valor posible
+    low_value = dic[low].get(campo, float('-inf'))
+    mid_value = dic[mid].get(campo, float('-inf'))
+    high_value = dic[high].get(campo, float('-inf'))
 
-    # Obtener los valores del diccionario y asegurar que sean válidos
-    low_value = obtener_primera_letra(dic[low].get(campo, float('-inf')))
-    mid_value = obtener_primera_letra(dic[mid].get(campo, float('-inf')))
-    high_value = obtener_primera_letra(dic[high].get(campo, float('-inf')))
-
-    # Crear la lista de candidatos al pivote
     pivot_candidates = [low_value, mid_value, high_value]
     
-    # Ordenar los candidatos
     pivot_candidates.sort()
 
-    return pivot_candidates[1]  # Devuelve el valor mediano
+    return pivot_candidates[1]
 
 def partition(dic, campo, low, high):
     pivot = median_of_three(dic, campo, low, high)
@@ -126,23 +115,26 @@ if __name__ == "__main__":
     print("Ejecución para los años:")
     medir_tiempo_y_memoria(unificar_archivos_bib, algoritmo, origen, campo)
 
-    campo = 'title'
-    algoritmo = "./Datos/QuickSort_Title.bib"
-    origen = './../unificados.bib'
+    try:
+        campo = 'title'
+        algoritmo = "./Datos/QuickSort_Title.bib"
+        origen = './../unificados.bib'
 
-    print("Ejecución para ordenar los títulos:")
-    medir_tiempo_y_memoria(unificar_archivos_bib, algoritmo, origen, campo)
+        print("Ejecución para ordenar los títulos:")
+        medir_tiempo_y_memoria(unificar_archivos_bib, algoritmo, origen, campo)
+    except:
+        print("Llega a la máxima recursión posible")
 
-    campo = 'journal'
-    algoritmo = "./Datos/QuickSort_Journal.bib"
-    origen = './../unificados.bib'
+    # campo = 'journal'
+    # algoritmo = "./Datos/QuickSort_Journal.bib"
+    # origen = './../unificados.bib'
 
-    print("Ejecución para ordenar los artículos por revista:")
-    medir_tiempo_y_memoria(unificar_archivos_bib, algoritmo, origen, campo)
+    # print("Ejecución para ordenar los artículos por revista:")
+    # medir_tiempo_y_memoria(unificar_archivos_bib, algoritmo, origen, campo)
 
-    campo = 'BDOrigen'
-    algoritmo = "./Datos/QuickSort_BDOrigen.bib"
-    origen = './../unificados.bib'
+    # campo = 'BDOrigen'
+    # algoritmo = "./Datos/QuickSort_BDOrigen.bib"
+    # origen = './../unificados.bib'
 
-    print("Ejecución para ordenar los artículos por Base de datos origen:")
-    medir_tiempo_y_memoria(unificar_archivos_bib, algoritmo, origen, campo)
+    # print("Ejecución para ordenar los artículos por Base de datos origen:")
+    # medir_tiempo_y_memoria(unificar_archivos_bib, algoritmo, origen, campo)
