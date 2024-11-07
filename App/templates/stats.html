@@ -3,6 +3,10 @@
 {% block title %}Estadísticos Descriptivos{% endblock title %}
 
 {% block body %}
-    <h2>{{ data.title }}</h2>
-    <img src="data:image/png;base64,{{ data.img }}" alt="{{ data.text }}">
+    <section class="vh-100">
+        <div class="container py-5 h-75">
+            <h2>{{ data.title }}</h2>
+            <img src="data:image/png;base64,{{ data.img }}" alt="{{ data.text }}">
+        </div>
+    </section>
 {% endblock body %}

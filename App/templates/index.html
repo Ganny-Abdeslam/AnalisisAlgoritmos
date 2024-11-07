@@ -2,13 +2,12 @@
 
 {% block title %}Algoritmia y bibliometría{% endblock title %}
 
+{% block subtext %}
+    <p class="lead">Selecciona un gráfico para ver más detalles</p>
+{% endblock %}
+
 {% block body %}
 <div class="container my-5">
-    <div class="text-center mb-4">
-        <h1 class="display-4">Proyecto Análisis de Algoritmos 2024-2</h1>
-        <p class="lead">Selecciona un gráfico para ver más detalles</p>
-    </div>
-    
     <div class="container my-5">
         <div class="row">
             {% for card in cards %}

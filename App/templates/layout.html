@@ -4,10 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
 </head>
 <body>
+    {% block encabezado %}
+    <nav class="text-center mb-4 pd-2">
+        <div class="container-fluid">
+            <!-- Botón "Perfil" al inicio -->
+            <div class="float-start">
+                <a href="{{ url_for('index') }}" class="btn me-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Título centrado -->
+            <h1 class="display-4">Proyecto Análisis de Algoritmos 2024-2</h1>
+    {% endblock %}
+        {% block subtext %}{% endblock %}
+    {% block encabezadoF %}
+        </div>
+    </nav>
+    {% endblock %}
+
     <div class="container">
         {% block body %}{% endblock %}
     </div>
@@ -16,7 +37,7 @@
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
 </body>
 
-<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top sticky-bottom">
     <div class="col-md-4 d-flex align-items-center">
       <span class="mb-3 mb-md-0 text-muted">&copy; 2024-2 Analisis de Algoritmos - Universidad del Quindío</span>
     </div>
