@@ -172,35 +172,42 @@ def generate_tipe():
 
     return render_template('stats.html', data=data)
 
-@app.route('/generate_stats')
-def generate_stats():
-
-    # Obtener los 15 artículos más citados y desglosar autores
-    top_cited_articles = list(collection.find().sort("citations", -1).limit(15))
-    
-    # Desglosar autores en una lista a partir de top_cited_articles y contarlos
+@app.route('/author')
+def generate_author():
+    # Obtener todos los documentos de la colección y desglosar los autores en una lista
     all_authors = []
-    for doc in top_cited_articles:
-        authors = doc['author'].split(", ")
-        all_authors.extend(authors)
+    for doc in collection.find():
+        # Desglosar autores, eliminar espacios y filtrar autores vacíos
+        authors = [author.strip() for author in doc['author'].split(",") if author.strip()]
+        # Evitar duplicados dentro del mismo título
+        unique_authors = set(authors)
+        all_authors.extend(unique_authors)
+    
+    # Contar la cantidad de títulos por autor y obtener los 15 principales
     top_authors = Counter(all_authors).most_common(15)
 
-    # Crear el gráfico de barras para los autores más citados
-    fig, ax = plt.subplots()
+    # Crear el gráfico de barras horizontal para los autores con más artículos
+    fig, ax = plt.subplots(figsize=(10, 6))  # Tamaño ajustado para mejor visualización
     authors, counts = zip(*top_authors)
     ax.barh(authors, counts, color='skyblue')
-    ax.set_title("Top 15 Autores Más Citados")
-    ax.set_xlabel("Cantidad de Citaciones")
+    ax.set_title("Top 15 Autores con Más Apariciones en Títulos")
+    ax.set_xlabel("Cantidad de Títulos")
     
     # Convertir el gráfico a PNG y luego a Base64 para renderizar en HTML
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
-    plot_data = base64.b64encode(output.getvalue()).decode()
+    img_base64 = base64.b64encode(output.getvalue()).decode()
+
+    data = {
+        'title': 'Autores más concurrentes en títulos',
+        'text': 'Gráfico de autores',
+        'img': img_base64
+    }
+
+    return render_template('stats.html', data=data)
 
 
-    # Pasar imágenes codificadas en base64 a la plantilla
-    return render_template('stats.html')
-
+    
 @app.route('/grafico/<int:graph_id>')
 def plot_page(graph_id):
     # Aquí defines la lógica para mostrar la página individual con la gráfica
