@@ -36,13 +36,34 @@ def index():
 def generate_year():
     by_year = Counter([doc['year'] for doc in collection.find()])
 
-    fig, ax = plt.subplots()
-    ax.bar(by_year.keys(), by_year.values(), color="skyblue")
-    ax.set_title("Productos por Año")
-    ax.set_xlabel("Año")
-    ax.set_ylabel("Cantidad de Productos")
+    # Colormap for the points
+    colormap = plt.get_cmap("viridis")
+    norm = plt.Normalize(0, len(by_year))
+
+    # Create a larger figure for better visibility
+    fig, ax = plt.subplots(figsize=(15, 8))  # Increase the figure size
+    years = list(by_year.keys())
+    counts = list(by_year.values())
+    
+    # Scatter plot
+    ax.scatter(years, counts, c=counts, cmap=colormap, s=100, edgecolors='black', alpha=0.7)
+
+    # Connect the points with thin lines from the origin (y=0)
+    for i, year in enumerate(years):
+        ax.plot([year, year], [0, counts[i]], color='gray', linewidth=1)
+
+    # Add titles and labels
+    ax.set_title("Productos por Año", fontsize=16)
+    ax.set_xlabel("Año", fontsize=14)
+    ax.set_ylabel("Cantidad de Productos", fontsize=14)
+    
+    # Make sure the labels are clear
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    
+    # Generate the image and encode it to base64
     img_base64 = create_base64_image(fig)
 
+    # Return the data to render in the template
     data = {
         'title': 'Productos por Año de Publicación',
         'text': 'Gráfico de los Años',
