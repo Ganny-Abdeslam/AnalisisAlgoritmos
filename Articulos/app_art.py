@@ -38,12 +38,15 @@ def extraer_campos(lineas, salida, origen):
                 count += 1
                 salida.write("------------------------------------\n")
                 salida.write(f"BDOrigen: {origen}\n")
+                match = re.search(r'@(\w+)\{', linea)
+                salida.write(f"Tipe: {match.group(1).upper()}\n")
         except:
             if linea and linea[0] == '@':
                 count += 1
                 salida.write("------------------------------------\n")
                 salida.write(f"BDOrigen: {origen}\n")
-
+                match = re.search(r'@(\w+)\{', linea)
+                salida.write(f"Tipe: {match.group(1).upper()}\n")
             else:
                 pass
 

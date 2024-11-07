@@ -1,0 +1,8 @@
+{% extends './layout.html' %}
+
+{% block title %}Estadísticos Descriptivos{% endblock title %}
+
+{% block body %}
+    <h2>{{ data.title }}</h2>
+    <img src="data:image/png;base64,{{ data.img }}" alt="{{ data.text }}">
+{% endblock body %}
