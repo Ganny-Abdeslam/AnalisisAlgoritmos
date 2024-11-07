@@ -21,16 +21,42 @@ def create_base64_image(fig):
 
 @app.route('/')
 def index():
+    titles = [
+        "Cantidad de productos por tipo y base de datos origen", 
+        "Productos por año de publicación", 
+        "Gráfico 3 xxxx", 
+        "Gráfico 4 xxxx", 
+        "Gráfico 5 xxxx", 
+        "Gráfico 6 xxxx", 
+        "Gráfico 7 xxxx", 
+        "Gráfico 8 xxxx", 
+        "Gráfico 9 xxxx", 
+        "Gráfico 10 xxxx", 
+        "Gráfico 11 xxxx", 
+        "Gráfico 12 xxxx", 
+        "Gráfico 13 xxxx", 
+        "Gráfico 14 xxxx", 
+        "Gráfico 15 xxxx"
+    ]
+
+    # Diccionario de URLs
+    url_map = {
+        1: '/tipe', 
+        2: '/year', 
+        
+    }
+    
     cards = [
         {
-            "title": f"Gráfico {i}",
-            "description": f"Descripción breve del gráfico {i}.",
+            "title": titles[i-1],
+            "description": f"Gráfico {i}",
             "graph_id": i,
-            "url": '/tipe' if i == 1 else url_for('plot_page', graph_id=i),
+            "url": url_map.get(i, url_for('plot_page', graph_id=i)),
             "image_url": url_for('static', filename=f'grafico{i}.png')
         }
         for i in range(1, 16)  # Crea 15 tarjetas
     ]
+    
     return render_template('index.html', cards=cards)
 
 @app.route('/year')
@@ -42,7 +68,7 @@ def generate_year():
     norm = plt.Normalize(0, len(by_year))
 
     # Create a larger figure for better visibility
-    fig, ax = plt.subplots(figsize=(15, 8))  # Increase the figure size
+    fig, ax = plt.subplots(figsize=(10, 6))  # Increase the figure size
     years = list(by_year.keys())
     counts = list(by_year.values())
     
@@ -66,7 +92,6 @@ def generate_year():
 
     # Return the data to render in the template
     data = {
-        'title': 'Productos por Año de Publicación',
         'text': 'Gráfico de los Años',
         'img': img_base64
     }

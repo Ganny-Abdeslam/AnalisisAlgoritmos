@@ -30,3 +30,19 @@
     padding: 10px; /* Ajusta el padding interno de cada tarjeta */
     margin: auto; /* Centra la tarjeta en la columna */
 }
+
+        /* Contenedor principal para centrar la gráfica */
+        .chart-container {
+            display: flex;
+            justify-content: center; /* Centrado horizontal */
+            align-items: center; /* Centrado vertical */
+            height: 100vh; /* Ocupa toda la altura de la pantalla */
+            overflow: hidden; /* Evita el desbordamiento */
+        }
+
+        /* Estilo para el canvas de matplotlib */
+        .chart {
+            width: 100%; /* El gráfico se ajusta al 100% del contenedor */
+            max-width: 100%; /* Limita el tamaño máximo */
+            height: auto; /* Mantiene la proporción del gráfico */
+        }
