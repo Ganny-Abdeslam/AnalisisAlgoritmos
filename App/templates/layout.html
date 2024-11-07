@@ -4,11 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
 </head>
 <body>
     {% block body %}
     {% endblock body %}
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
 </body>
+
+<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+    <div class="col-md-4 d-flex align-items-center">
+      <span class="mb-3 mb-md-0 text-muted">&copy; 2024-2 Analisis de Algoritmos - Universidad del Quindío</span>
+    </div>
+
+    <div class="col-md-7 d-flex align-items-center justify-content-end">
+        <span class="mb-3 mb-md-0 text-muted">Gasser Abdeslam Abdelgelil Serna - Santiago Marin Dussan - David Idarraga Lugo</span>
+      </div>
+
+  </footer>
 </html>

@@ -1,8 +1,22 @@
 {% extends './layout.html' %}
 
-{% block title %}Gráfico Flask + Matplotlib{% endblock title %}
+{% block title %}Home - Gráficos{% endblock title %}
 
 {% block body %}
-<h1>Gráfico Generado con Flask y Matplotlib</h1>
-<img src="{{ url_for('plot_png') }}" alt="Gráfico generado">
+<div class="container my-5">
+    <div class="text-center mb-4">
+        <h1 class="display-4">Proyecto Analisis de Algoritmos 2024-2</h1>
+        <p class="lead">Selecciona un gráfico para ver más detalles</p>
+    </div>
+    
+    <div class="container my-5">
+        <div class="row">
+            {% for card in cards %}
+                {% include "card.html" %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    
+</div>
 {% endblock body %}
