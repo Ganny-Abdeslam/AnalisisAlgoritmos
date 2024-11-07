@@ -1,3 +1,32 @@
-body{
-    background-color: wheat;
+.capsulas-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.capsula {
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.capsula:hover {
+    background-color: #e0e0e0;
+}
+
+.capsula a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+.custom-card {
+    max-width: 220px; /* Ajusta el ancho máximo de las tarjetas */
+}
+
+.custom-card .card {
+    padding: 10px; /* Ajusta el padding interno de cada tarjeta */
+    margin: auto; /* Centra la tarjeta en la columna */
 }
