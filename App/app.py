@@ -24,7 +24,7 @@ def index():
     titles = [
         "Cantidad de productos por tipo y base de datos origen", 
         "Productos por año de publicación", 
-        "Gráfico 3 xxxx", 
+        "Autores más concurrentes en títulos", 
         "Gráfico 4 xxxx", 
         "Gráfico 5 xxxx", 
         "Gráfico 6 xxxx", 
@@ -43,6 +43,7 @@ def index():
     url_map = {
         1: '/tipe', 
         2: '/year', 
+        3: 'author',
         
     }
     
@@ -189,7 +190,10 @@ def generate_author():
     # Crear el gráfico de barras horizontal para los autores con más artículos
     fig, ax = plt.subplots(figsize=(10, 6))  # Tamaño ajustado para mejor visualización
     authors, counts = zip(*top_authors)
-    ax.barh(authors, counts, color='skyblue')
+    
+    # Aplicar la paleta de colores 'viridis'
+    ax.barh(authors, counts, color=plt.cm.viridis([i / len(counts) for i in range(len(counts))]))
+    
     ax.set_title("Top 15 Autores con Más Apariciones en Títulos")
     ax.set_xlabel("Cantidad de Títulos")
     
@@ -205,7 +209,6 @@ def generate_author():
     }
 
     return render_template('stats.html', data=data)
-
 
     
 @app.route('/grafico/<int:graph_id>')
