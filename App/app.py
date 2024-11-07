@@ -26,7 +26,8 @@ def index():
             "title": f"Gráfico {i}",
             "description": f"Descripción breve del gráfico {i}.",
             "graph_id": i,
-            "image_url": url_for('static', filename=f'grafico{i}.png')  # Usa static/images para las rutas de las imágenes
+            "url": '/tipe' if i == 1 else url_for('plot_page', graph_id=i),
+            "image_url": url_for('static', filename=f'grafico{i}.png')
         }
         for i in range(1, 16)  # Crea 15 tarjetas
     ]
@@ -118,7 +119,7 @@ def generate_tipe():
 
     # Datos a pasar a la plantilla
     data = {
-        'title': 'Productos por Tipo y BDOrigen',
+        
         'text': 'Gráfico mostrando productos agrupados por Tipo y BDOrigen',
         'img': img_base64
     }

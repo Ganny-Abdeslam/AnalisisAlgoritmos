@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}Proyecto Análisis de Algoritmos 2024-2{% endblock title %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="text-center mb-4">
+        <h1 class="display-4">Proyecto Análisis de Algoritmos 2024-2</h1>
+        <p class="lead">Selecciona un gráfico para ver más detalles</p>
+    </div>
+
+    <div class="text-center my-4">
+        <h2>{{ graph_title }}</h2>
+        <p>{{ graph_description }}</p>
+        <img src="data:image/png;base64,{{ graph_image }}" alt="Gráfico {{ graph_title }}" class="img-fluid">
+    </div>
+</div>
+{% endblock body %}
