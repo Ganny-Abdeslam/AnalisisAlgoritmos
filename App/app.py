@@ -6,7 +6,10 @@ from pymongo import MongoClient
 from collections import Counter
 import textwrap
 import base64
+import pandas as pd
+import seaborn as sns
 from collections import Counter, defaultdict
+from wordcloud import WordCloud
 
 app = Flask(__name__, static_folder='images')
 
@@ -31,13 +34,13 @@ def index():
         "Cantidad de articulos por base de datos", 
         "Cantidad y tipo de productos por año", 
         "Cantidad de publicaciones por autor y base de datos", 
-        "Gráfico 8 xxxx", 
+        "Cantidad de Artículos por Journal", 
         "Gráfico 9 xxxx", 
         "Gráfico 10 xxxx", 
         "Gráfico 11 xxxx", 
         "Gráfico 12 xxxx", 
-        "Gráfico 13 xxxx", 
-        "Gráfico 14 xxxx", 
+        "Nube de palabras (Variables respecto a los abstracts)", 
+        "Nube de palabras respecto a los abstracts", 
         "Gráfico 15 xxxx"
     ]
 
@@ -49,7 +52,11 @@ def index():
         4: '/top_journals',
         5: '/database_articles',
         6: '/products_by_year_and_type',
-        7: '/author_by_database'
+        7: '/author_by_database',
+        8: '/journal_heatmap',
+        13: '/nube-palabrasPull',
+        14: '/nube-palabras'
+
         
     }
     
@@ -79,6 +86,7 @@ def generate_year():
     years = list(by_year.keys())
     counts = list(by_year.values())
     
+    
     # Scatter plot
     ax.scatter(years, counts, c=counts, cmap=colormap, s=100, edgecolors='black', alpha=0.7)
 
@@ -90,6 +98,7 @@ def generate_year():
     ax.set_title("Productos por Año", fontsize=16)
     ax.set_xlabel("Año", fontsize=14)
     ax.set_ylabel("Cantidad de Productos", fontsize=14)
+    ax.set_xticks(range(1949, 2025, 10))
     
     # Make sure the labels are clear
     ax.tick_params(axis='both', which='major', labelsize=12)
@@ -205,6 +214,11 @@ def generate_author():
     ax.set_title("Top 15 Autores con Más Apariciones en Títulos")
     ax.set_xlabel("Cantidad de Títulos")
     
+    # Agregar etiquetas del valor de cada barra
+    for i, count in enumerate(counts):
+        ax.text(count + 0.9, i, str(count), va='center')  # 0.2 es para un pequeño margen desde la barra
+    
+    
     # Convertir el gráfico a PNG y luego a Base64 para renderizar en HTML
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
@@ -255,7 +269,7 @@ def top_journals():
 
     # Aumentar el tamaño de las etiquetas y añadir márgenes para mejor visibilidad
     ax.tick_params(axis='y', labelsize=6)  # Reducir el tamaño de las etiquetas en Y
-    fig.subplots_adjust(left=0.4)  # Ajustar márgenes de la figura
+    fig.subplots_adjust(left=0.2, right=0.8, top=0.95)  # Ajustar márgenes de la figura
 
     # Etiquetas de cada barra
     for bar, count in zip(bars, counts):
@@ -266,6 +280,7 @@ def top_journals():
 
     # Retornar los datos para la plantilla
     data = {
+        'title': 'Top 15 Journals Más Citados',
         'text': 'Top 15 Journals Más Citados',
         'img': img_base64
     }
@@ -374,6 +389,7 @@ def generate_products_by_year_and_type():
     ax.set_xlabel("Año")
     ax.set_ylabel("Cantidad de Productos")
     ax.legend(title="Tipo de Producto")
+    ax.set_xticks(range(1952, 2025, 4))
 
     # Convertir el gráfico a base64 para mostrar en HTML
     img_base64 = create_base64_image(fig)
@@ -404,30 +420,34 @@ def generate_author_by_database():
     total_counts = {author: sum(db_counts.values()) for author, db_counts in author_db_data.items()}
     top_authors = dict(sorted(total_counts.items(), key=lambda x: x[1], reverse=True)[:15])
 
+    # Ordenar los autores en orden descendente de publicaciones
+    sorted_authors = sorted(top_authors.keys(), key=lambda x: total_counts[x], reverse=True)
+
     # Preparar los datos para el gráfico apilado
     db_sources = sorted({db for counts in author_db_data.values() for db in counts})  # Listar todas las BDOrigen
     counts_by_db = {db: [] for db in db_sources}
-    for author in top_authors:
+    for author in sorted_authors:
         for db in db_sources:
             counts_by_db[db].append(author_db_data[author].get(db, 0))  # Obtener el conteo o 0 si no hay datos
 
     # Crear el gráfico de barras apiladas horizontales
     fig, ax = plt.subplots(figsize=(10, 6))
-    bottom = [0] * len(top_authors)  # Inicializar la posición inferior para apilar
+    bottom = [0] * len(sorted_authors)  # Inicializar la posición inferior para apilar
 
     # Colores para cada base de datos
     colormap = plt.get_cmap("viridis")
     norm = plt.Normalize(0, len(db_sources))
 
     for idx, db in enumerate(db_sources):
-        ax.barh(list(top_authors.keys()), counts_by_db[db], left=bottom,
+        ax.barh(sorted_authors, counts_by_db[db], left=bottom,
                 label=db, color=colormap(norm(idx)), zorder=3)
         bottom = [bottom[i] + counts_by_db[db][i] for i in range(len(bottom))]  # Acumular para apilar
 
     # Ajustes de etiquetas y leyenda
     ax.set_title("Autores por Base de Datos")
-    ax.set_xlabel("Cantidad de Títulos")
-    ax.legend(title="BDOrigen", bbox_to_anchor=(0.78, 1), loc='upper left')  # Colocar leyenda fuera del gráfico
+    ax.set_xlabel("Cantidad de publicaciones")
+    ax.invert_yaxis()  # Invertir el eje y para mostrar el mayor arriba y el menor abajo
+    ax.legend(title="BDOrigen", loc='lower right')  
 
     # Convertir el gráfico a base64 para el renderizado en HTML
     output = io.BytesIO()
@@ -443,10 +463,112 @@ def generate_author_by_database():
 
     return render_template('stats.html', data=data)
 
+@app.route('/journal_heatmap')
+def generate_journal_heatmap():
+    # Contar el número de artículos para cada journal, ignorando los vacíos
+    journal_counts = Counter([doc['journal'] for doc in collection.find() if 'journal' in doc and doc['journal']])
 
+    # Seleccionar los 15 journals con más artículos
+    top_journals = journal_counts.most_common(15)
+    journals = [item[0] for item in top_journals]
+    counts = [item[1] for item in top_journals]
 
+    # Crear un DataFrame para usarlo en el mapa de calor
+    df = pd.DataFrame({'Journal': journals, 'Articles': counts}).set_index('Journal')
 
+    # Configurar la figura y el mapa de calor
+    fig, ax = plt.subplots(figsize=(13, 8))
+    sns.heatmap(df, annot=True, cmap='viridis', cbar=True, linewidths=0.5, linecolor='gray', fmt="d", ax=ax)
 
+    # Ajustar las etiquetas de los journals con textwrap (agregar saltos de línea)
+    wrapped_journals = [textwrap.fill(journal, width=25) for journal in journals]  # Ajustar el ancho
+
+    # Ajustes de título y etiquetas
+    ax.set_title("Cantidad de Artículos por Journal", fontsize=16)
+    ax.set_xlabel("Número de Artículos")
+    ax.set_ylabel("Journal")
+
+    # Ajustar las etiquetas de Y con texto envuelto y ajustar el tamaño de fuente
+    ax.set_yticklabels(wrapped_journals, fontsize=5, rotation=0)  # Aplicar el texto envuelto y ajustar el tamaño de fuente
+
+    # Aumentar el tamaño de las etiquetas y añadir márgenes para mejor visibilidad
+    ax.tick_params(axis='y', labelsize=5)  # Reducir el tamaño de las etiquetas en Y
+    fig.subplots_adjust(left=0.2, right=0.8)  # Ajustar márgenes de la figura
+
+    # Convertir el gráfico a PNG y luego a Base64 para renderizar en HTML
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    img_base64 = base64.b64encode(output.getvalue()).decode()
+
+    # Pasar los datos a la plantilla
+    data = {
+        'title': 'Mapa de Calor de Artículos por Journal',
+        'text': 'Gráfico de Mapa de Calor de la Cantidad de Artículos por Journal',
+        'img': img_base64
+    }
+
+    return render_template('stats.html', data=data)
+
+@app.route('/nube-palabras')
+def generate_wordcloud():
+    # Recuperar todos los abstracts de la base de datos
+    abstracts = [doc['abstract'] for doc in collection.find()]
+    
+    # Unir todos los abstracts en un solo texto
+    text = ' '.join(abstracts)
+    
+    # Crear la nube de palabras
+    wordcloud = WordCloud(width=1200, height=800, background_color='white').generate(text)
+    
+    # Crear la figura de matplotlib
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.imshow(wordcloud, interpolation='bilinear')
+    ax.axis('off')  # No mostrar los ejes
+    
+    # Convertir la imagen a base64
+    img_base64 = create_base64_image(fig)
+    
+    # Retornar la imagen en la plantilla
+    data = {
+        'title': 'Nube de Palabras respecto a los abstracts',
+        'img': img_base64
+    }
+
+    return render_template('wordcloud.html', data=data)
+
+@app.route('/nube-palabrasPull')
+def generate_wordcloudPull():
+    # Leer el archivo palabras.txt desde la misma carpeta que app.py
+    with open('palabras.txt', 'r') as f:
+        palabras_pull = set(line.strip().lower() for line in f)
+
+    # Recuperar todos los abstracts de la base de datos
+    abstracts = [doc['abstract'] for doc in collection.find()]
+
+    # Unir todos los abstracts en un solo texto
+    text = ' '.join(abstracts)
+
+    # Filtrar solo las palabras que están en el pull
+    palabras_filtradas = ' '.join([palabra for palabra in text.split() if palabra.lower() in palabras_pull])
+
+    # Crear la nube de palabras con las palabras filtradas
+    wordcloud = WordCloud(width=1200, height=800, background_color='white').generate(palabras_filtradas)
+
+    # Crear la figura de matplotlib
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.imshow(wordcloud, interpolation='bilinear')
+    ax.axis('off')  # No mostrar los ejes
+
+    # Convertir la imagen a base64
+    img_base64 = create_base64_image(fig)
+
+    # Retornar la imagen en la plantilla
+    data = {
+        'title': 'Nube de Palabras de las variables respecto a los abstracts ',
+        'img': img_base64
+    }
+
+    return render_template('wordcloud.html', data=data)
 
 
 @app.route('/grafico/<int:graph_id>')

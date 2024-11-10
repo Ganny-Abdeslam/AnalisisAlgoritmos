@@ -24,6 +24,7 @@ for record in records:
     data = {
         "BDOrigen": re.search(r"BDOrigen:\s*(.*)", record).group(1).strip() if re.search(r"BDOrigen:\s*(.*)", record) else "",
         "Tipe": re.search(r"Tipe:\s*(.*)", record).group(1).strip() if re.search(r"Tipe:\s*(.*)", record) else "",
+        "journal": re.search(r"journal:\s*(.*)", record).group(1).strip() if re.search(r"journal:\s*(.*)", record) else "",
         "author": re.search(r"author:\s*(.*)", record).group(1).strip() if re.search(r"author:\s*(.*)", record) else "",
         "title": re.search(r"title:\s*(.*)", record).group(1).strip() if re.search(r"title:\s*(.*)", record) else "",
         "year": int(re.search(r"year:\s*(\d+)", record).group(1).strip()) if re.search(r"year:\s*(\d+)", record) else None,
