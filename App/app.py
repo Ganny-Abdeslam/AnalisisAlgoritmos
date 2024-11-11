@@ -10,6 +10,9 @@ import pandas as pd
 import seaborn as sns
 from collections import Counter, defaultdict
 from wordcloud import WordCloud
+import random
+import networkx as nx
+import re
 
 app = Flask(__name__, static_folder='images')
 
@@ -35,13 +38,11 @@ def index():
         "Cantidad y tipo de productos por año", 
         "Cantidad de publicaciones por autor y base de datos", 
         "Cantidad de Artículos por Journal", 
-        "Gráfico 9 xxxx", 
-        "Gráfico 10 xxxx", 
-        "Gráfico 11 xxxx", 
-        "Gráfico 12 xxxx", 
+        "Cantidad de autores por pais", 
+        "Cantidad de variables por Categorías", 
         "Nube de palabras (Variables respecto a los abstracts)", 
         "Nube de palabras respecto a los abstracts", 
-        "Gráfico 15 xxxx"
+
     ]
 
     # Diccionario de URLs
@@ -54,22 +55,25 @@ def index():
         6: '/products_by_year_and_type',
         7: '/author_by_database',
         8: '/journal_heatmap',
-        13: '/nube-palabrasPull',
-        14: '/nube-palabras'
+        9: '/authors_by_country',
+        10: '/palabras-variable',
+        11: '/nube-palabrasPull',
+        12: '/nube-palabras',
 
         
     }
     
     cards = [
-        {
-            "title": titles[i-1],
-            "description": f"Gráfico {i}",
-            "graph_id": i,
-            "url": url_map.get(i, url_for('plot_page', graph_id=i)),
-            "image_url": url_for('static', filename=f'grafico{i}.png')
-        }
-        for i in range(1, 16)  # Crea 15 tarjetas
-    ]
+    {
+        "title": titles[i-1],
+        "description": f"Gráfico {i}",
+        "graph_id": i,
+        # Si es el gráfico 10, redirigir a variables.html
+        "url": url_for('variables_page') if i == 10 else url_map.get(i, url_for('plot_page', graph_id=i)),
+        "image_url": url_for('static', filename=f'grafico{i}.png')
+    }
+    for i in range(1, 13)  # Crea 15 tarjetas
+]
     
     return render_template('index.html', cards=cards)
 
@@ -570,11 +574,296 @@ def generate_wordcloudPull():
 
     return render_template('wordcloud.html', data=data)
 
+def obtener_pais_aleatorio():
+    paises = ['EEUU', 'Canada', 'Reino Unido', 'Alemania', 'Francia', 'España', 'Italia', 'Australia', 'India', 'China', 'México', 'Brasil', 'Japón', 'Argentina', 'Sudáfrica']
+    return random.choice(paises)
+
+@app.route('/authors_by_country')
+def authors_by_country():
+    # Obtener todos los documentos de la colección y desglosar los autores en una lista
+    authors_by_country = []
+
+    for doc in collection.find():
+        # Desglosar autores, eliminar espacios y filtrar autores vacíos
+        authors = [author.strip() for author in doc['author'].split(",") if author.strip()]
+        # Asignar un país aleatorio a cada autor
+        for author in authors:
+            country = obtener_pais_aleatorio()
+            authors_by_country.append(country)
+
+    # Contar la cantidad de autores por país
+    country_counts = Counter(authors_by_country)
+    top_countries = country_counts.most_common()  # Obtener todos los países con su conteo
+
+    # Crear el gráfico de barras horizontal para los autores por país
+    fig, ax = plt.subplots(figsize=(12, 8))  # Tamaño ajustado para mejor visualización
+    countries, counts = zip(*top_countries)
+    
+    # Aplicar la paleta de colores 'viridis'
+    ax.barh(countries, counts, color=plt.cm.viridis([i / len(counts) for i in range(len(counts))]))
+    
+    ax.set_title("Cantidad de Autores por País")
+    ax.set_xlabel("Cantidad de Autores")
+    
+    # Agregar etiquetas del valor de cada barra
+    for i, count in enumerate(counts):
+        ax.text(count + 0.9, i, str(count), va='center')  # 0.2 es para un pequeño margen desde la barra
+    
+    # Convertir el gráfico a PNG y luego a Base64 para renderizar en HTML
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    img_base64 = base64.b64encode(output.getvalue()).decode()
+
+    # Datos para pasar a la plantilla HTML
+    data = {
+        'title': 'Autores por País',
+        'text': 'Gráfico de autores distribuidos por país',
+        'img': img_base64
+    }
+
+    return render_template('stats.html', data=data)
+
+
+@app.route('/palabras-variable')
+def palabras_variable():
+    arr = [
+     [
+        'Abstraction',
+        'Algorithm',
+        'Algorithmic thinking',
+        'Coding',
+        'Collaboration',
+        'Cooperation',
+        'Creativity',
+        'Critical thinking',
+        'Debug',
+        'Decomposition',
+        'Evaluation',
+        'Generalization',
+        'Logic',
+        'Logical thinking',
+        'Modularity',
+        'Patterns recognition',
+        'Problem solving',
+        'Programming',
+        'Representation',
+        'Reuse',
+        'Simulation',
+    ],
+
+    [
+        'Conditionals',
+        'Control structures',
+        'Directions',
+        'Events',
+        'Funtions',
+        'Loops',
+        'Modular structure',
+        'Parallelism',
+        'Sequences',
+        'Software/hardware',
+        'Variables',
+    ],
+
+    [
+        'Emotional',
+        'Engagement',
+        'Motivation',
+        'Perceptions',
+        'Persistence',
+        'Self-efficacy',
+        'Self-perceived'
+    ],
+
+    [
+        'Classical Test Theory - CTT',
+        'Confirmatory Factor Analysis - CFA',
+        'Exploratory Factor Analysis - EFA',
+        'Item Response Theory(IRT) - IRT',
+        'Reliability',
+        'Structural Equation Model - SEM',
+        'Validity',
+    ],
+
+    [
+        'Beginners Computational Thinking test - BCTt',
+        'Coding Attitudes Survey - ESCAS',
+        'Collaborative Computing Observation Instrument',
+        'Competent Computational Thinking test - cCTt',
+        'Computational thinking skills test - CTST',
+        'Computational concepts',
+        'Computational Thinking Assessment for Chinese Elementary Students - CTA-CES',
+        'Computational Thinking Challenge - CTC',
+        'Computational Thinking Levels Scale - CTLS',
+        'Computational Thinking Scale - CTS',
+        'Computational Thinking Skill Levels Scale - CTS',
+        'Computational Thinking Test - CTt',
+        'Computational Thinking Test',
+        'Computational Thinking Test for Elementary School Students - CTT-ES',
+        'Computational Thinking Test for Lower Primary - CTtLP',
+        'Computational thinking-skill tasks on numbers and arithmetic',
+        'Computerized Adaptive Programming Concepts Test - CAPCT',
+        'CT Scale - CTS',
+        'Elementary Student Coding Attitudes Survey - ESCAS',
+        'General self-efficacy scale',
+        'ICT competency test',
+        'Instrument of computational identity',
+        'KBIT fluid intelligence subtest',
+        'Mastery of computational concepts Test and an Algorithmic Test',
+        'Multidimensional 21st Century Skills Scale',
+        'Self-efficacy scale',
+        'STEM learning attitude scale - STEM-LAS',
+        'The computational thinking scale',
+    ],
+
+    [
+        'No experimental',
+        'Experimental', 'Longitudinal research',
+        'Mixed methods',
+        'Post-test',
+        'Pre-test',
+        'Quasi-experiments',
+    ],
+
+    [
+        'Upper elementary education',
+        'Upper elementary school',
+        'Primary school',
+        'Primary education',
+        'Elementary school',
+        'Early childhood education',
+        'Kindergarten',
+        'Preschool',
+        'Secondary school',
+        'Secondary education',
+        'high school',
+        'higher education',
+        'University',
+        'College'
+    ],
+
+    [
+        'Block programming',
+        'Mobile application',
+        'Pair programming',
+        'Plugged activities',
+        'Programming',
+        'Robotics',
+        'Spreadsheet',
+        'STEM',
+        'Unplugged activities'
+    ],
+
+    [
+        'Construct-by-self mind mapping',
+        'CBS-MM',
+        'Construct-on-scaffold mind mapping',
+        'COS-MM',
+        'Design-based learning',
+        'CTDBL',
+        'Design-based learning',
+        'DBL',
+        'Evidence-centred design approach',
+        'Gamification',
+        'Reverse engineering pedagogy',
+        'REP',
+        'Technology-enhanced learning',
+        'Collaborative learning',
+        'Cooperative learning',
+        'Flipped classroom',
+        'Game-based learning',
+        'Inquiry-based learning',
+        'Personalized learning',
+        'Problem-based learning',
+        'Project-based learning',
+        'Universal design for learning',
+    ],
+
+    [
+        'Alice',
+        'Arduino',
+        'Scratch',
+        'ScratchJr',
+        'Blockly Games',
+        'Code.org',
+        'Codecombat',
+        'CSUnplugged',
+        'Robot Turtles',
+        'Hello Ruby',
+        'Kodable',
+        'LightbotJr',
+        'KIBO robots',
+        'BEE BOT',
+        'CUBETTO',
+        'Minecraft',
+        'Agent Sheets',
+        'Mimo',
+        'Py Learn',
+        'SpaceChem',
+    ]]
+
+        # Acumular conteo de palabras clave en MongoDB
+    arrAux = [
+        sum(collection.count_documents({'abstract': re.compile(f'.*{re.escape(word.lower())}.*', re.IGNORECASE)})
+            for word in category) for category in arr
+    ]
+
+    # Crear diccionario de categorías y valores de conteo
+    categorias = {
+        'Habilidades': arrAux[0],
+        'Conceptos computacionales': arrAux[1],
+        'Actitudes': arrAux[2],
+        'Propiedades psicométricas': arrAux[3],
+        'Herramienta de evaluación': arrAux[4],
+        'Diseño de investigación': arrAux[5],
+        'Nivel de escolaridad': arrAux[6],
+        'Medio': arrAux[7],
+        'Estrategia': arrAux[8],
+        'Herramienta': arrAux[9]
+    }
+
+    # Ordenar las categorías y valores de mayor a menor
+    labels, values = zip(*sorted(categorias.items(), key=lambda x: x[1], reverse=True))
+
+    # Crear gráfico de barras horizontales con más espacio entre etiquetas y la paleta 'viridis'
+    fig, ax = plt.subplots(figsize=(14, 8))  # Aumentar el tamaño de la figura para mayor claridad
+    bar_height = 0.6  # Ajustar el alto de las barras si es necesario
+
+    ax.barh(labels, values, height=bar_height, color=plt.cm.viridis([i / len(values) for i in range(len(values))]), edgecolor='black')
+    ax.set_title("Distribución de Categorías", fontsize=16)
+    ax.set_xlabel("Cantidad", fontsize=14, labelpad=20)  # Ajustar el padding para el xlabel
+    ax.set_ylabel("Categorías", fontsize=14)
+
+    # Ajustar las etiquetas del eje y con saltos de línea usando textwrap
+    max_label_length = 20  # Longitud máxima de cada línea de la etiqueta
+    wrapped_labels = [textwrap.fill(label, width=max_label_length) for label in labels]
+    ax.set_yticklabels(wrapped_labels, fontsize=10)
+
+    # Convertir la imagen en base64 para el template
+    img_base64 = create_base64_image(fig)
+
+    data = {
+        'title': 'Cantidad de variables por Categorías',
+        'text': 'Gráfico de Categorías',
+        'img': 'images/grafico10.png'
+    }
+
+    return render_template('variables.html', data=data)
+
+    
+@app.route('/variables_diez')
+def variables_page():
+    data = {
+        'key': 'value',  # Añade cualquier información que necesites pasar
+    }
+    return render_template('variables.html', data=data)
+
 
 @app.route('/grafico/<int:graph_id>')
 def plot_page(graph_id):
     # Aquí defines la lógica para mostrar la página individual con la gráfica
     return render_template('plot.html', graph_id=graph_id)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
