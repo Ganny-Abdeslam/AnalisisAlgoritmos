@@ -14,8 +14,9 @@ from wordcloud import WordCloud
 app = Flask(__name__, static_folder='images')
 
 # Conectar a MongoDB
-client = MongoClient("mongodb://localhost:27017/")
-db = client["analisis"]
+#client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb+srv://unix:unix@cluster0.51z20q3.mongodb.net")
+db = client["unilocal"]
 collection = db["articulos"]
 
 def create_base64_image(fig):
