@@ -1,0 +1,13 @@
+{% extends './layout.html' %}
+
+{% block title %}Estadísticos Descriptivos{% endblock title %}
+
+{% block body %}
+    <section class="vh-100">
+        <div class="container py-5 h-75">
+            <h2>Cantidad de variables por Categorías</h2>
+            <p>{{ data.text }}</p>
+            <img src="{{ url_for('static', filename='grafico10.png') }}" alt="Gráfico de Categorías" width="1200" height="auto">
+        </div>
+    </section>
+{% endblock body %}
