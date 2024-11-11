@@ -11,7 +11,6 @@ import seaborn as sns
 from collections import Counter, defaultdict
 from wordcloud import WordCloud
 import random
-import networkx as nx
 import re
 
 app = Flask(__name__, static_folder='images')
@@ -867,6 +866,6 @@ def plot_page(graph_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0')
 
 
